@@ -4,8 +4,6 @@ from utils.training_fns import train_model, load_model
 from utils.load_data import load_data
 from torch.optim import Adam
 import torch.nn as nn
-from torchvision import models
-
 
 parser =argparse.ArgumentParser(description= 'Train a NN for Image classification.')
 parser.add_argument('train_dir')
@@ -31,7 +29,3 @@ else:
     device=="cpu"
 
 train_model(model, loss, optimizer,train_load, val_load, device=device, num_epochs=epochs)
-
-
-
-                               
