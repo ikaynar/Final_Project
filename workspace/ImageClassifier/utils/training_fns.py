@@ -15,7 +15,10 @@ def load_model(model_name):
 
 def train_model(model, criterion, optimizer,train_dataloader, val_loader, device, num_epochs=25):
     
+    
+    best_acc=0
     for epoch in range(num_epochs):
+        model.to(device)
         model.train()
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         print('-' * 10)
@@ -64,7 +67,13 @@ def train_model(model, criterion, optimizer,train_dataloader, val_loader, device
             outputs=model(inputs)
             loss=criterion(outputs, labels)
             val_loss += loss.item() * inputs.size(0)
-            val_corrects += torch.sum(preds==labels.data)
+            #val_corrects += torch.sum(preds==labels.data)
+            
+             # Calculate accuracy
+            ps = torch.exp(outputs)
+            top_p, top_class = ps.topk(1, dim=1)
+            equals = top_class == labels.view(*top_class.shape)
+            val_corrects += torch.mean(equals.type(torch.FloatTensor)).item()
 
         total_val_loss = val_loss / len(val_loader)
         total_val_acc = val_corrects / len(val_loader)
@@ -73,9 +82,8 @@ def train_model(model, criterion, optimizer,train_dataloader, val_loader, device
         print('Validation ACC: {}'.format(total_val_acc))
 
         if  total_val_acc>best_acc:
-            best_acc=epoch_acc
-            best_model_wts=copy.deepcopy(model.state_dict())
+            best_acc=total_val_acc
+            #best_model_wts=copy.deepcopy(model.state_dict())
+            torch.save(model, "./best_model.pth")
             
-        torch.save(model_ft, "./best_model.pth")
-        
     return model
